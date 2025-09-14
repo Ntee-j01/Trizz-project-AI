@@ -6,21 +6,19 @@ import OpenAI from "openai";
 const app = express();
 const port = 3000;
 
-// Middleware to parse JSON bodies
-app.use(express.json());
-
 // Initialize DeepSeek client
 const deepseek = new OpenAI({
   baseURL: 'https://api.deepseek.com',
   apiKey: 'sk-cfde3def1b814aa1928e6f4a88cf2df0', // replace with your key
 });
 
-// Endpoint to get AI response
-app.post("/api/chat", async (req, res) => {
-  const userPrompt = req.body.prompt;
+// GET endpoint to pass prompt in URL
+// Example: http://localhost:3000/api/chat?prompt=Write+a+story
+app.get("/api/chat", async (req, res) => {
+  const userPrompt = req.query.prompt;
 
   if (!userPrompt) {
-    return res.status(400).json({ error: "Missing 'prompt' in request body." });
+    return res.status(400).json({ error: "Missing 'prompt' query parameter." });
   }
 
   try {
@@ -41,4 +39,5 @@ app.post("/api/chat", async (req, res) => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running at http:/'sk-your-deepseek-api-key''
+  console.log(`Server running at http://localhost:${port}`);
+});
