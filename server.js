@@ -1,30 +1,44 @@
+// Install dependencies first: npm install express openai
+
 import express from "express";
 import OpenAI from "openai";
 
 const app = express();
 const port = 3000;
 
-// Initialize OpenAI client with your key
-const client = new OpenAI({
-  apiKey: "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", // replace with your key
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Initialize DeepSeek client
+const deepseek = new OpenAI({
+  baseURL: 'https://api.deepseek.com',
+  apiKey: 'sk-cfde3def1b814aa1928e6f4a88cf2df0', // replace with your key
 });
 
-// Endpoint to get unicorn story
-app.get("/unicorn", async (req, res) => {
+// Endpoint to get AI response
+app.post("/api/chat", async (req, res) => {
+  const userPrompt = req.body.prompt;
+
+  if (!userPrompt) {
+    return res.status(400).json({ error: "Missing 'prompt' in request body." });
+  }
+
   try {
-    const response = await client.responses.create({
-      model: "gpt-5",
-      input: "Write a short bedtime story about a unicorn.",
+    const completion = await deepseek.chat.completions.create({
+      model: "deepseek-chat",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: userPrompt },
+      ],
     });
 
-    res.send(`<h1>Unicorn Story</h1><p>${response.output_text}</p>`);
+    res.json({ response: completion.choices[0].message.content });
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Error generating story");
+    console.error("Error calling DeepSeek API:", error);
+    res.status(500).json({ error: "Error generating response" });
   }
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+  console.log(`Server running at http:/'sk-your-deepseek-api-key''
