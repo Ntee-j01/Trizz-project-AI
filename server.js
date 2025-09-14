@@ -12,29 +12,35 @@ const deepseek = new OpenAI({
   apiKey: 'sk-cfde3def1b814aa1928e6f4a88cf2df0', // replace with your key
 });
 
-// GET endpoint to pass prompt in URL, supports plain text
-// Example: http://localhost:3000/api/chat?prompt=Write a story
-app.get("/api/chat", async (req, res) => {
-  let userPrompt = req.query.prompt;
-
-  if (!userPrompt) {
-    return res.status(400).json({ error: "Missing 'prompt' query parameter." });
-  }
-
-  // Ensure safe encoding
-  userPrompt = decodeURIComponent(userPrompt);
+// Root route with built-in prompt, returns JSON
+app.get("/", async (req, res) => {
+  // Built-in prompt
+  const builtInPrompt = "Write a short bedtime story about a unicorn.";
 
   try {
     const completion = await deepseek.chat.completions.create({
       model: "deepseek-chat",
       messages: [
         { role: "system", content: "You are a helpful assistant." },
-        { role: "user", content: userPrompt },
+        { role: "user", content: builtInPrompt },
       ],
     });
 
-    res.json({ response: completion.choices[0].message.content });
+    // Return JSON with prompt and response
+    res.json({
+      prompt: builtInPrompt,
+      response: completion.choices[0].message.content
+    });
   } catch (error) {
+    console.error("Error calling DeepSeek API:", error);
+    res.status(500).json({ error: "Error generating response" });
+  }
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});  } catch (error) {
     console.error("Error calling DeepSeek API:", error);
     res.status(500).json({ error: "Error generating response" });
   }
